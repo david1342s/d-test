@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artifact Generator</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-light: #f4f4f4;
+            --bg-dark: #282c34;
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --text-color-light: #333;
+            --text-color-dark: #f4f4f4;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-color-light);
+            transition: all 0.3s ease;
+        }
+        .dark-mode {
+            background-color: var(--bg-dark);
+            color: var(--text-color-dark);
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+        }
+        .navbar-title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .navbar-icons {
+            display: flex;
+            gap: 20px;
+        }
+        .navbar-icon {
+            color: white;
+            cursor: pointer;
+            font-size: 20px;
+            transition: transform 0.2s;
+        }
+        .navbar-icon:hover {
+            transform: scale(1.2);
+        }
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            gap: 20px;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        .tab.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        .section {
+            display: none;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .section.active {
+            display: block;
+        }
+        .code-input, .image-upload {
+            width: 100%;
+            min-height: 300px;
+            margin-bottom: 15px;
+            border: 2px solid var(--primary-color);
+            border-radius: 8px;
+            padding: 10px;
+            resize: vertical;
+        }
+        .artifact-preview {
+            border: 2px dashed var(--primary-color);
+            min-height: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 15px;
+        }
+        .generate-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: background-color 0.3s ease;
+        }
+        .generate-btn:hover {
+            background-color: #27ae60;
+        }
+        .dark-mode .code-input,
+        .dark-mode .image-upload {
+            background-color: #2c313a;
+            color: var(--text-color-dark);
+            border-color: #4b5563;
+        }
+        #imagePreview {
+            max-width: 100%;
+            max-height: 300px;
+        }
+        .dark-mode .tabs .tab {
+            background-color: #3a3f4b;
+            color: #f4f4f4;
+        }
+        .dark-mode .tabs .tab.active {
+            background-color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-title">Artifact Generator</div>
+        <div class="navbar-icons">
+            <i class="fas fa-adjust navbar-icon" onclick="toggleDarkMode()" title="Toggle Dark/Light Mode"></i>
+            <i class="fas fa-download navbar-icon" onclick="downloadArtifact()" title="Download Artifact"></i>
+        </div>
+    </nav>
+
+    <div class="tabs">
+        <div class="tab active" data-section="code">Code to Artifact</div>
+        <div class="tab" data-section="image">Image to Artifact</div>
+    </div>
+
+    <section id="codeSection" class="section active">
+        <textarea class="code-input" id="codeInput" placeholder="Paste your HTML/CSS code here..."></textarea>
+        <button class="generate-btn" onclick="generateCodeArtifact()">Generate Artifact</button>
+        <div id="codeArtifactPreview" class="artifact-preview"></div>
+    </section>
+
+    <section id="imageSection" class="section">
+        <input type="file" class="image-upload" id="imageUpload" accept="image/*">
+        <button class="generate-btn" onclick="generateImageArtifact()">Generate Artifact</button>
+        <div id="imageArtifactPreview" class="artifact-preview">
+            <img id="imagePreview" />
+        </div>
+    </section>
+
+    <script>
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs and sections
+                document.querySelectorAll('.tab, .section').forEach(el => {
+                    el.classList.remove('active');
+                });
+                
+                // Add active class to clicked tab and corresponding section
+                tab.classList.add('active');
+                document.getElementById(`${tab.dataset.section}Section`).classList.add('active');
+            });
+        });
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+        }
+
+        function generateCodeArtifact() {
+            const code = document.getElementById('codeInput').value;
+            const preview = document.getElementById('codeArtifactPreview');
+            
+            preview.innerHTML = `
+                <iframe 
+                    style="width:100%; height:300px; border:none;" 
+                    srcdoc="${escapeHtml(code)}">
+                </iframe>
+            `;
+        }
+
+        function generateImageArtifact() {
+            const fileInput = document.getElementById('imageUpload');
+            const imagePreview = document.getElementById('imagePreview');
+            const artifactPreview = document.getElementById('imageArtifactPreview');
+
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    // Update image preview
+                    imagePreview.src = e.target.result;
+                    
+                    // Generate HTML artifact for the image
+                    const imageCode = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Image Artifact</title>
+    <style>
+        body { 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+            background-color: #f0f0f0; 
+        }
+        img { 
+            max-width: 100%; 
+            max-height: 100%; 
+            object-fit: contain; 
+        }
+    </style>
+</head>
+<body>
+    <img src="${e.target.result}" alt="Uploaded Image">
+</body>
+</html>
+                    `.trim();
+
+                    // Create iframe to show artifact preview
+                    artifactPreview.innerHTML = `
+                        <iframe 
+                            style="width:100%; height:300px; border:none;" 
+                            srcdoc="${escapeHtml(imageCode)}">
+                        </iframe>
+                    `;
+                }
+                
+                reader.readAsDataURL(fileInput.files[0]);
+            }
+        }
+
+        function downloadArtifact() {
+            const activeSection = document.querySelector('.section.active');
+            let content = '', filename = '';
+
+            if (activeSection.id === 'codeSection') {
+                content = document.getElementById('codeInput').value;
+                filename = 'code-artifact.html';
+            } else {
+                const imagePreview = document.getElementById('imagePreview');
+                content = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Image Artifact</title>
+    <style>
+        body { 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+            background-color: #f0f0f0; 
+        }
+        img { 
+            max-width: 100%; 
+            max-height: 100%; 
+            object-fit: contain; 
+        }
+    </style>
+</head>
+<body>
+    <img src="${imagePreview.src}" alt="Uploaded Image">
+</body>
+</html>
+                `.trim();
+                filename = 'image-artifact.html';
+            }
+
+            const blob = new Blob([content], {type: 'text/html'});
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+        }
+
+        function escapeHtml(unsafe) {
+            return unsafe
+                 .replace(/&/g, "&amp;")
+                 .replace(/</g, "&lt;")
+                 .replace(/>/g, "&gt;")
+                 .replace(/"/g, "&quot;")
+                 .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>
