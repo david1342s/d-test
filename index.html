@@ -129,6 +129,15 @@
         .dark-mode .tabs .tab.active {
             background-color: var(--primary-color);
         }
+        #generatedCode {
+            width: 100%;
+            min-height: 200px;
+            margin-top: 15px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
     </style>
 </head>
 <body>
@@ -157,6 +166,7 @@
         <div id="imageArtifactPreview" class="artifact-preview">
             <img id="imagePreview" />
         </div>
+        <textarea id="generatedCode" readonly placeholder="Generated HTML Code will appear here"></textarea>
     </section>
 
     <script>
@@ -194,6 +204,7 @@
             const fileInput = document.getElementById('imageUpload');
             const imagePreview = document.getElementById('imagePreview');
             const artifactPreview = document.getElementById('imageArtifactPreview');
+            const generatedCodeArea = document.getElementById('generatedCode');
 
             if (fileInput.files && fileInput.files[0]) {
                 const reader = new FileReader();
@@ -212,24 +223,35 @@
     <style>
         body { 
             display: flex; 
-            justify-content: center; 
+            flex-direction: column;
             align-items: center; 
-            height: 100vh; 
-            margin: 0; 
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
             background-color: #f0f0f0; 
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
         }
         img { 
             max-width: 100%; 
-            max-height: 100%; 
+            max-height: 80vh; 
             object-fit: contain; 
+            border: 2px solid #3498db;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
     </style>
 </head>
 <body>
+    <h1>Uploaded Image</h1>
     <img src="${e.target.result}" alt="Uploaded Image">
 </body>
 </html>
                     `.trim();
+
+                    // Display generated code in textarea
+                    generatedCodeArea.value = imageCode;
 
                     // Create iframe to show artifact preview
                     artifactPreview.innerHTML = `
@@ -252,34 +274,7 @@
                 content = document.getElementById('codeInput').value;
                 filename = 'code-artifact.html';
             } else {
-                const imagePreview = document.getElementById('imagePreview');
-                content = `
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Image Artifact</title>
-    <style>
-        body { 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
-            margin: 0; 
-            background-color: #f0f0f0; 
-        }
-        img { 
-            max-width: 100%; 
-            max-height: 100%; 
-            object-fit: contain; 
-        }
-    </style>
-</head>
-<body>
-    <img src="${imagePreview.src}" alt="Uploaded Image">
-</body>
-</html>
-                `.trim();
+                content = document.getElementById('generatedCode').value;
                 filename = 'image-artifact.html';
             }
 
